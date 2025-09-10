@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ApexPlanet Capstone — demo full web app using HTML, CSS, and JS. Product catalog, cart, blog, performance and cross-browser friendly.">
+  <title>ApexPlanet — Capstone Web App</title>
+  <meta name="theme-color" content="#0b1220">
+
+  <!-- Critical CSS -->
+  <style>
+    :root{--bg:#071028;--card:#0f172a;--muted:#9aa6b8;--accent:#06b6d4;--glass:rgba(255,255,255,0.04);--radius:12px}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial;color:#e9f2fb;background:linear-gradient(180deg,#041226,#071028);-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    .app{max-width:1150px;margin:0 auto;padding:1rem}
+    header{position:sticky;top:0;background:rgba(5,10,18,0.55);backdrop-filter:blur(6px);padding:.6rem;border-bottom:1px solid rgba(255,255,255,0.03);z-index:50}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .brand{display:flex;gap:.6rem;align-items:center}
+    .logo{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#7c3aed);font-weight:800}
+    .search{flex:1;max-width:640px}
+    .action-row{display:flex;gap:.6rem;align-items:center}
+    button{cursor:pointer}
+    main{display:grid;grid-template-columns:1fr 320px;gap:1rem;margin-top:1rem}
+    @media (max-width:980px){main{grid-template-columns:1fr} .aside{order:2}}
+    .hero{display:flex;align-items:center;gap:1rem;padding:1rem;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent)}
+    .hero h1{margin:.2rem 0;font-size:1.4rem}
+    .lead{color:var(--muted);font-size:.95rem}
+    .controls{display:flex;gap:.5rem;flex-wrap:wrap}
+    .controls select,.controls input{padding:.45rem .6rem;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .catalog{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1rem}
+    @media (max-width:1100px){.catalog{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:680px){.catalog{grid-template-columns:1fr}}
+    .card{background:linear-gradient(180deg,var(--card),rgba(255,255,255,0.02));padding:1rem;border-radius:10px;box-shadow:0 4px 18px rgba(2,6,12,0.45);display:flex;flex-direction:column;gap:.6rem}
+    .thumb{width:100%;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:#081424;display:grid;place-items:center}
+    .price{font-weight:700}
+    .aside{position:relative}
+    .panel{background:linear-gradient(180deg,#071222,#0b1728);padding:1rem;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .cart-item{display:flex;gap:.6rem;align-items:center;padding:.4rem 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
+    .blog-list{margin-top:1rem;display:grid;gap:.6rem}
+    .post{padding:.6rem;border-radius:8px}
+    footer{margin-top:1.25rem;padding:1rem;text-align:center;color:var(--muted);font-size:.9rem}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:.6rem;align-items:center}
+    .chip{padding:.35rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,0.04)}
+    input,textarea{width:100%;padding:.45rem .6rem;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin-bottom:.5rem}
+  </style>
+
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div class="nav">
+        <div class="brand">
+          <div class="logo">AP</div>
+          <div>
+            <div style="font-weight:700">ApexPlanet</div>
+            <div class="muted" style="font-size:.85rem">Capstone Web App</div>
+          </div>
+        </div>
+
+        <div class="search">
+          <input id="q" aria-label="Search products" placeholder="Search products or posts..." style="width:100%;padding:.5rem .75rem;border-radius:8px;">
+        </div>
+
+        <div class="action-row">
+          <button id="toggle-theme" class="chip" title="Toggle theme">Theme</button>
+          <button id="cart-btn" class="chip" aria-haspopup="dialog">Cart (<span id="cart-count">0</span>)</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <div class="hero">
+          <div>
+            <h1>Build. Optimize. Ship.</h1>
+            <p class="lead">A compact capstone demonstrating a full web app with dynamic features, performance techniques, and cross-browser friendly code — built with plain HTML, CSS, and JavaScript.</p>
+            <div class="controls">
+              <select id="category">
+                <option value="all">All categories</option>
+              </select>
+              <select id="sort">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price: Low → High</option>
+                <option value="price-desc">Price: High → Low</option>
+              </select>
+              <button id="clear-filters" class="chip">Clear</button>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Cart persists in localStorage. Images lazy-load.</div>
+            <div style="margin-top:.6rem"><button id="add-sample" class="chip">Add sample product</button></div>
+          </div>
+        </div>
+
+        <div id="catalog" class="catalog" aria-live="polite"></div>
+
+        <h2 style="margin-top:1rem">Latest blog posts</h2>
+        <div id="blog" class="blog-list"></div>
+
+      </section>
+
+      <aside class="aside">
+        <div class="panel">
+          <h3 style="margin:0 0 .5rem 0">Your Cart</h3>
+          <div id="cart-list" aria-live="polite"></div>
+          <div style="margin-top:.6rem;display:flex;justify-content:space-between;align-items:center">
+            <strong>Total:</strong>
+            <div id="cart-total">₹0</div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;gap:.5rem">
+            <button id="checkout" class="btn" style="padding:.5rem .6rem;border-radius:8px">Checkout</button>
+            <button id="empty-cart" class="ghost" style="padding:.5rem .6rem;border-radius:8px">Empty</button>
+          </div>
+        </div>
+
+        <div style="height:1rem"></div>
+        <div class="panel">
+          <h4 style="margin:.2rem 0">Contact</h4>
+          <form id="contact" novalidate>
+            <input name="name" placeholder="Your name" required>
+            <input name="email" type="email" placeholder="Email" required>
+            <textarea name="message" rows="3" placeholder="Message" required></textarea>
+            <button type="submit" class="btn" style="width:100%">Send</button>
+          </form>
+        </div>
+
+      </aside>
+    </main>
+
+    <footer>
+      Built for ApexPlanet. Performance-minded, mobile-friendly, cross-browser compatible.
+    </footer>
+  </div>
+
+  <script defer>
+  (function(){
+    'use strict';
+
+    /***** Data (full product list) *****/
+    const PRODUCTS = [
+      {id:1,title:'Compact Solar Lamp',price:1299,cat:'solar',img:'https://picsum.photos/seed/solar1/800/600',desc:'Energy-efficient lamp for homes.'},
+      {id:2,title:'Rainwater Filter',price:2499,cat:'water',img:'https://picsum.photos/seed/filter1/800/600',desc:'Portable water filter.'},
+      {id:3,title:'Smart Plant Sensor',price:899,cat:'agri',img:'https://picsum.photos/seed/sensor1/800/600',desc:'Monitor soil moisture easily.'},
+      {id:4,title:'Assistive Grip Tool',price:699,cat:'assist',img:'https://picsum.photos/seed/grip1/800/600',desc:'Helps with daily tasks.'},
+      {id:5,title:'Eco Tote Bag',price:299,cat:'misc',img:'https://picsum.photos/seed/tote1/800/600',desc:'Reusable shopping bag.'},
+      {id:6,title:'Smart Water Meter',price:3599,cat:'smartcity',img:'https://picsum.photos/seed/meter1/800/600',desc:'Monitor water usage.'}
+    ];
+
+    const POSTS = [
+      {id:'p1',title:'How we optimized load time',date:'2025-09-01',url:'https://blog.cloudflare.com/best-practices-for-speeding-up-websites/',excerpt:'A practical guide to trimming JS and deferring non-critical assets.'},
+      {id:'p2',title:'Designing for low-bandwidth users',date:'2025-08-12',url:'https://web.dev/fast/',excerpt:'Make interfaces resilient and fast even on slow networks.'}
+    ];
+
+    /***** Utilities *****/
+    const $ = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const fmt = n => '₹' + Number(n).toLocaleString();
+    const storage = {get(k,def){try{return JSON.parse(localStorage.getItem(k)) ?? def}catch(e){return def}},set(k,v){localStorage.setItem(k,JSON.stringify(v))},del(k){localStorage.removeItem(k)}};
+
+    /***** State *****/
+    let state = {products:PRODUCTS.slice(), cart: storage.get('ap_cart', {}) || {}, query:'', category:'all', sort:'featured'};
+
+    /***** DOM refs *****/
+    const catalogEl = $('#catalog');
+    const blogEl = $('#blog');
+    const cartList = $('#cart-list');
+    const cartCount = $('#cart-count');
+    const cartTotal = $('#cart-total');
+    const qEl = $('#q');
+
+    /***** Rendering *****/
+    function renderCatalog(){
+      const q = state.query.trim().toLowerCase();
+      let items = state.products.filter(p => (state.category==='all' || p.cat===state.category) && (p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)));
+      if(state.sort==='price-asc') items.sort((a,b)=>a.price-b.price);
+      if(state.sort==='price-desc') items.sort((a,b)=>b.price-a.price);
+
+      catalogEl.innerHTML = items.map(p=>`
+        <article class="card" data-id="${p.id}">
+          <div class="thumb">
+            <img data-src="${p.img}" alt="${p.title}" loading="lazy" width="800" height="600" style="width:100%;height:100%;object-fit:cover;display:block">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.3rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <h3 style="margin:.2rem 0;font-size:1rem">${p.title}</h3>
+              <div class="price">${fmt(p.price)}</div>
+            </div>
+            <p class="muted" style="margin:0;font-size:.9rem">${p.desc}</p>
+            <div style="margin-top:.5rem;display:flex;gap:.5rem">
+              <button class="add btn" data-id="${p.id}" style="padding:.45rem .6rem;border-radius:8px">Add</button>
+              <button class="view ghost" data-id="${p.id}" style="padding:.45rem .6rem;border-radius:8px">View</button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      observeImages();
+    }
+
+    function renderBlog(){
+      blogEl.innerHTML = POSTS.map(p=>`
+        <div class="post panel">
+          <strong>${p.title}</strong>
+          <div class="muted" style="font-size:.85rem">${p.date}</div>
+          <p class="muted" style="margin:.4rem 0">${p.excerpt}</p>
+          <a href="${p.url}" target="_blank" rel="noopener noreferrer">Read</a>
+        </div>
+      `).join('');
+    }
+
+    function renderCart(){
+      const entries = Object.entries(state.cart);
+      if(entries.length === 0){
+        cartList.innerHTML = '<div class="muted">Cart is empty</div>';
+        cartCount.textContent = '0';
+        cartTotal.textContent = fmt(0);
+        storage.set('ap_cart', {}); // keep storage in sync (empty)
+        return;
+      }
+      cartList.innerHTML = entries.map(([id,qty])=>{
+        const p = state.products.find(x=>x.id==id);
+        return `<div class="cart-item"><div style="flex:1"><strong>${p.title}</strong><div class="muted" style="font-size:.85rem">${fmt(p.price)} × ${qty}</div></div><div style="text-align:right"><div>${fmt(p.price*qty)}</div><div style="margin-top:.3rem"><button class="qty" data-id="${id}" data-op="-">−</button><button class="qty" data-id="${id}" data-op="+">+</button></div></div></div>`;
+      }).join('');
+      const total = entries.reduce((s,[id,qty])=>{const p=state.products.find(x=>x.id==id);return s + p.price*qty},0);
+      cartCount.textContent = entries.reduce((s,[,q])=>s+q,0);
+      cartTotal.textContent = fmt(total);
+      storage.set('ap_cart', state.cart); // persist cart
+    }
+
+    /***** Image lazy loading *****/
+    let io;
+    function observeImages(){
+      const imgs = Array.from(catalogEl.querySelectorAll('img[data-src]'));
+      if('IntersectionObserver' in window){
+        if(!io) io = new IntersectionObserver((entries)=>entries.forEach(e=>{ if(e.isIntersecting){ const img = e.target; img.src = img.dataset.src; img.removeAttribute('data-src'); io.unobserve(img); } }), {rootMargin:'200px'});
+        imgs.forEach(img => { if(img.dataset.src) io.observe(img); });
+      } else {
+        imgs.forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
+      }
+    }
+
+    /***** Event handlers *****/
+    function onAdd(id){ state.cart[id] = (state.cart[id]||0) + 1; renderCart(); }
+    function onRemove(id){ if(state.cart[id]){ state.cart[id]--; if(state.cart[id] <= 0) delete state.cart[id]; renderCart(); } }
+
+    document.addEventListener('click', e=>{
+      const add = e.target.closest('.add'); if(add){ onAdd(add.dataset.id); return; }
+      const qty = e.target.closest('.qty'); if(qty){ const id = qty.dataset.id; qty.dataset.op === '+' ? onAdd(id) : onRemove(id); return; }
+      const view = e.target.closest('.view'); if(view){ const id = view.dataset.id; const p = state.products.find(x=>x.id==id); alert('Preview: ' + p.title); return; }
+      if(e.target.id === 'add-sample'){ const p = { id: Date.now(), title: 'New Sample', price: 499, cat: 'misc', img: 'https://picsum.photos/seed/new'+Date.now()+'/800/600', desc: 'Auto-added sample' }; state.products.unshift(p); populateCategories(); renderCatalog(); return; }
+      if(e.target.id === 'clear-filters'){ state.category = 'all'; state.sort = 'featured'; $('#category').value = 'all'; $('#sort').value = 'featured'; renderCatalog(); return; }
+      if(e.target.id === 'checkout'){
+        if(Object.keys(state.cart).length === 0){ alert('Cart empty'); return; }
+        // simulate checkout and clear cart both in memory and storage
+        alert('Checkout simulated. Thank you!');
+        state.cart = {};
+        storage.set('ap_cart', {});
+        renderCart();
+        return;
+      }
+      if(e.target.id === 'empty-cart'){ state.cart = {}; storage.set('ap_cart', {}); renderCart(); return; }
+    });
+
+    // search & filters
+    $('#category').addEventListener('change', e=>{ state.category = e.target.value; renderCatalog(); });
+    $('#sort').addEventListener('change', e=>{ state.sort = e.target.value; renderCatalog(); });
+    qEl.addEventListener('input', e=>{ state.query = e.target.value; clearTimeout(qEl._t); qEl._t = setTimeout(()=>renderCatalog(), 200); });
+
+    // contact form validation & submit
+    $('#contact').addEventListener('submit', e=>{
+      e.preventDefault();
+      // use built-in validity UI if available
+      if(!e.target.checkValidity()){
+        e.target.reportValidity();
+        return;
+      }
+      const fd = new FormData(e.target);
+      // simulate sending...
+      alert('Message received, thanks ' + (fd.get('name') || 'there') + '! (Simulated)');
+      e.target.reset();
+    });
+
+    // cart button behavior
+    $('#cart-btn').addEventListener('click', ()=>{ window.scrollTo({top:0, behavior:'smooth'}); $('#cart-list').focus(); });
+
+    // theme toggle
+    $('#toggle-theme').addEventListener('click', ()=>{ const cur = storage.get('ap_theme','dark'); const next = cur === 'dark' ? 'light' : 'dark'; storage.set('ap_theme', next); alert('Theme toggled (simulated). Refresh to see persistent change.)'); });
+
+    // populate category select
+    function populateCategories(){
+      const cats = ['all', ...new Set(state.products.map(p=>p.cat))];
+      $('#category').innerHTML = cats.map(c=>`<option value="${c}">${c[0].toUpperCase()+c.slice(1)}</option>`).join('');
+    }
+
+    // feature detection polyfills (small)
+    if(typeof Object.assign !== 'function'){ Object.assign = function(target){ if(!target) throw new TypeError('Cannot convert undefined or null to object'); for(var i=1;i<arguments.length;i++){ var source = arguments[i]; if(source) for(var key in source) if(Object.prototype.hasOwnProperty.call(source,key)) target[key] = source[key]; } return target; }; }
+
+    // performance hint
+    try{ const link = document.createElement('link'); link.rel = 'preconnect'; link.href = 'https://picsum.photos'; document.head.appendChild(link); }catch(e){}
+
+    // service worker via blob (optional caching)
+    if('serviceWorker' in navigator){
+      const swCode = `self.addEventListener('install',e=>{self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(clients.claim());});
+self.addEventListener('fetch',e=>{ const url = new URL(e.request.url);
+  if(url.origin.includes('picsum.photos')){
+    e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+  } else {
+    e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{const c=resp.clone(); caches.open('ap-runtime').then(cache=>cache.put(e.request,c)); return resp;})).catch(()=>caches.match('/')));
+  }
+});`;
+      try{
+        const blob = new Blob([swCode], {type:'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).then(()=>console.log('SW registered via blob')).catch(()=>{});
+      }catch(e){}
+    }
+
+    // initial render
+    populateCategories();
+    renderCatalog();
+    renderBlog();
+    renderCart();
+
+    // expose debugging
+    window.__APEX = { state, renderCatalog, renderCart };
+
+  })();
+  </script>
+
+</body>
+</html>
